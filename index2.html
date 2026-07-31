@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ceylon Nikah — Profile Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --teal-900:#0f3b37;
+    --teal-800:#134944;
+    --teal-700:#1b5e57;
+    --gold:#c69a2e;
+    --gold-light:#e8c766;
+    --cream:#faf6ee;
+    --card:#ffffff;
+    --ink:#232320;
+    --ink-soft:#5c6a67;
+    --line:#e7ded0;
+    --danger:#b3413e;
+    --whatsapp:#25D366;
+    --radius:14px;
+    --shadow: 0 4px 16px rgba(15,59,55,0.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Noto Sans Tamil','Noto Sans',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:60px;
+  }
+  ::selection{background:var(--gold-light);}
+  a{color:inherit;}
+
+  /* ---------- Logo ---------- */
+  .logo-mark{ display:block; }
+  .logo-mark .ring{ fill:none; stroke:var(--gold); stroke-width:2.2; }
+  .logo-mark .crescent{ fill:var(--gold); }
+  .logo-mark .dot{ fill:var(--gold-light); }
+
+  /* ---------- Login screen ---------- */
+  #loginScreen{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:radial-gradient(circle at 30% 20%, #1b5e57 0%, #0f3b37 55%, #0a2925 100%);
+    padding:20px;
+  }
+  .login-card{
+    background:var(--card);
+    border-radius:18px;
+    width:100%;
+    max-width:380px;
+    padding:32px 28px 26px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.35);
+    text-align:center;
+  }
+  .login-card h1{
+    font-family:'Poppins',sans-serif;
+    font-size:20px;
+    margin:14px 0 2px;
+    color:var(--teal-900);
+  }
+  .login-card p.tagline{
+    margin:0 0 22px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+  .login-card .field{margin-bottom:12px;text-align:left;}
+  .login-card label{font-size:12px;font-weight:600;color:var(--teal-800);font-family:'Poppins',sans-serif;display:block;margin-bottom:5px;}
+  .login-card input{
+    width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:9px;
+    font-size:14px;font-family:inherit;background:#fdfbf7;color:var(--ink);
+  }
+  .login-card input:focus{outline:none;border-color:var(--teal-700);}
+  .remember-row{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-soft);margin:6px 0 16px;text-align:left;}
+  .login-err{
+    background:#fdecec;color:var(--danger);font-size:12.5px;padding:9px 12px;border-radius:8px;margin-bottom:12px;display:none;
+  }
+  .login-note{
+    background:#f1ece0;color:var(--teal-800);font-size:11.5px;padding:9px 12px;border-radius:8px;margin-top:16px;text-align:left;line-height:1.5;
+  }
+  .setup-badge{
+    display:inline-block;background:var(--gold);color:var(--teal-900);font-family:'Poppins',sans-serif;
+    font-size:10.5px;font-weight:700;letter-spacing:0.4px;padding:3px 10px;border-radius:20px;margin-bottom:10px;
+  }
+
+  /* ---------- App shell (reuses earlier styles) ---------- */
+  #appScreen{display:none;}
+  header{
+    background:linear-gradient(135deg,var(--teal-900),var(--teal-700));
+    color:#fff;
+    padding:22px 20px 26px;
+    position:relative;
+    overflow:hidden;
+  }
+  header::after{content:"";position:absolute;right:-40px; top:-60px;width:200px;height:200px;border:1.5px solid rgba(255,255,255,0.12);border-radius:50%;}
+  header::before{content:"";position:absolute;right:20px; bottom:-70px;width:140px;height:140px;border:1.5px solid rgba(255,255,255,0.10);border-radius:50%;}
+  .brand{display:flex;align-items:center;gap:12px;position:relative;z-index:1;}
+  .brand h1{font-family:'Poppins',sans-serif;font-size:20px;font-weight:600;margin:0;letter-spacing:0.2px;}
+  .brand p{margin:2px 0 0;font-size:12.5px;color:rgba(255,255,255,0.75);}
+  .header-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .session-box{display:flex;align-items:center;gap:8px;position:relative;z-index:1;}
+  .role-pill{
+    background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.25);
+    padding:5px 11px;border-radius:20px;font-size:11.5px;color:#fff;font-family:'Poppins',sans-serif;font-weight:500;
+  }
+  .logout-btn{
+    background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.25);color:#fff;
+    padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer;font-family:'Poppins',sans-serif;
+  }
+  .stats-row{display:flex;gap:10px;margin-top:18px;position:relative;z-index:1;flex-wrap:wrap;}
+  .stat-chip{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);border-radius:10px;padding:8px 14px;font-size:12.5px;color:#fff;}
+  .stat-chip b{font-family:'Poppins',sans-serif;font-size:15px;display:block;color:var(--gold-light);}
+
+  .wrap{max-width:1000px;margin:0 auto;padding:0 16px;}
+  .toolbar{
+    margin-top:-20px;position:relative;z-index:2;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+    padding:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+  }
+  .search-input{flex:1 1 220px;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:14px;font-family:inherit;color:var(--ink);background:#fdfbf7;}
+  .search-input:focus{outline:none;border-color:var(--teal-700);}
+  select.filter{padding:11px 10px;border:1.5px solid var(--line);border-radius:10px;font-size:13.5px;font-family:inherit;background:#fdfbf7;color:var(--ink);max-width:130px;}
+  .btn{
+    font-family:'Poppins',sans-serif;font-weight:600;font-size:13.5px;border:none;border-radius:10px;padding:11px 16px;
+    cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:transform .12s ease, box-shadow .12s ease;white-space:nowrap;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--gold);color:var(--teal-900);}
+  .btn-primary:hover{box-shadow:0 4px 12px rgba(198,154,46,0.4);}
+  .btn-outline{background:transparent;color:var(--teal-800);border:1.5px solid var(--line);}
+  .btn-outline:hover{border-color:var(--teal-700);}
+  .btn-danger{background:#fdecec;color:var(--danger);}
+  .btn-whatsapp{background:var(--whatsapp);color:#fff;}
+  .btn-sm{padding:7px 11px;font-size:12px;border-radius:8px;}
+  .btn-icon{width:34px;height:34px;padding:0;border-radius:9px;justify-content:center;flex-shrink:0;}
+
+  .section-label{font-family:'Poppins',sans-serif;font-size:12px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-soft);margin:26px 4px 10px;display:flex;justify-content:space-between;align-items:center;}
+
+  .grid{display:flex;flex-wrap:wrap;gap:14px;}
+  .profile-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;width:100%;max-width:100%;flex:1 1 280px;cursor:pointer;border:1px solid transparent;transition:border-color .15s ease, transform .15s ease;display:flex;flex-direction:column;}
+  .profile-card:hover{border-color:var(--gold);transform:translateY(-2px);}
+  .pc-top{display:flex;gap:12px;padding:14px 14px 10px;}
+  .pc-photo{width:64px;height:64px;border-radius:10px;object-fit:cover;background:#efe8d8;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:22px;font-family:'Poppins',sans-serif;font-weight:600;}
+  .pc-info{min-width:0;flex:1;}
+  .pc-regid{font-family:'Poppins',sans-serif;font-size:11px;color:var(--gold);font-weight:700;letter-spacing:0.4px;}
+  .pc-name{font-size:15.5px;font-weight:600;color:var(--ink);margin:2px 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .pc-sub{font-size:12.5px;color:var(--ink-soft);}
+  .pc-tags{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 12px;align-items:center;}
+  .tag{font-size:11px;background:#f1ece0;color:var(--teal-800);padding:4px 9px;border-radius:20px;font-weight:500;}
+  .pc-share{margin-left:auto;background:var(--whatsapp);color:#fff;border:none;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;}
+  .empty-state{text-align:center;padding:50px 20px;color:var(--ink-soft);}
+  .empty-state .icon{font-size:40px;margin-bottom:10px;}
+
+  .overlay{display:none;position:fixed;inset:0;background:rgba(15,30,28,0.55);z-index:50;padding:16px;overflow-y:auto;}
+  .overlay.active{display:flex;align-items:flex-start;justify-content:center;}
+  .modal{background:var(--card);border-radius:16px;width:100%;max-width:640px;margin:20px auto 40px;box-shadow:0 20px 60px rgba(0,0,0,0.25);overflow:hidden;}
+  .modal-head{background:linear-gradient(135deg,var(--teal-900),var(--teal-700));color:#fff;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;}
+  .modal-head h2{font-family:'Poppins',sans-serif;font-size:17px;margin:0;font-weight:600;}
+  .modal-close{background:rgba(255,255,255,0.15);border:none;color:#fff;width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+  .modal-body{padding:20px;}
+  .form-grid{display:flex;flex-wrap:wrap;gap:12px;}
+  .field{flex:1 1 220px;display:flex;flex-direction:column;gap:5px;}
+  .field.full{flex:1 1 100%;}
+  .field label{font-size:12px;font-weight:600;color:var(--teal-800);font-family:'Poppins',sans-serif;}
+  .field input, .field select, .field textarea{padding:10px 12px;border:1.5px solid var(--line);border-radius:9px;font-size:14px;font-family:inherit;background:#fdfbf7;color:var(--ink);width:100%;resize:vertical;}
+  .field input:focus, .field select:focus, .field textarea:focus{outline:none;border-color:var(--teal-700);}
+  .field small{color:var(--ink-soft);font-size:11px;}
+  .checkline{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink);}
+  .photo-upload-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+  .photo-thumb{position:relative;width:70px;height:70px;border-radius:10px;overflow:hidden;}
+  .photo-thumb img{width:100%;height:100%;object-fit:cover;}
+  .photo-thumb .rm{position:absolute;top:2px;right:2px;background:rgba(179,65,62,0.9);color:#fff;border:none;width:18px;height:18px;border-radius:50%;font-size:11px;cursor:pointer;line-height:1;}
+  .photo-add-btn{width:70px;height:70px;border-radius:10px;border:1.5px dashed var(--line);background:#fdfbf7;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--ink-soft);cursor:pointer;}
+  .modal-foot{padding:16px 20px 20px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;border-top:1px solid var(--line);}
+
+  .detail-photos{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+  .detail-photos img{width:90px;height:90px;border-radius:10px;object-fit:cover;}
+  .detail-grid{display:flex;flex-wrap:wrap;gap:0;border-top:1px solid var(--line);}
+  .detail-row{flex:1 1 50%;padding:11px 4px;border-bottom:1px solid var(--line);font-size:13.5px;}
+  .detail-row .k{color:var(--ink-soft);font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:2px;}
+  .detail-row.full{flex:1 1 100%;}
+  .detail-row .v{white-space:pre-wrap;}
+
+  .client-list{display:flex;flex-direction:column;gap:10px;}
+  .client-item{border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+  .client-item .cn{font-weight:600;font-family:'Poppins',sans-serif;font-size:14px;color:var(--teal-900);}
+  .client-item .cu{font-size:12px;color:var(--ink-soft);}
+  .client-item .cperm{font-size:11px;color:var(--teal-800);margin-top:3px;}
+  .client-actions{display:flex;gap:6px;}
+  .cred-box{background:#f1ece0;border-radius:10px;padding:14px;margin-top:10px;font-size:13px;}
+  .cred-box .row{display:flex;justify-content:space-between;margin-bottom:6px;}
+  .cred-box b{font-family:'Poppins',sans-serif;color:var(--teal-900);}
+
+  footer{text-align:center;padding:26px 16px 10px;color:var(--ink-soft);font-size:12px;}
+
+  @media print{
+    header,.toolbar,.section-label,.grid,footer,.modal-foot{display:none !important;}
+    .overlay{position:static;background:none;padding:0;}
+    .modal{box-shadow:none;max-width:100%;}
+    .modal-head{background:var(--teal-900) !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN / SETUP SCREEN ===================== -->
+<div id="loginScreen">
+  <div class="login-card">
+    <svg class="logo-mark" width="56" height="56" viewBox="0 0 56 56" style="margin:0 auto;">
+      <circle class="ring" cx="28" cy="28" r="24"/>
+      <path class="crescent" d="M33 12a17 17 0 1 0 0 32 14 14 0 1 1 0-32z"/>
+      <circle class="dot" cx="37" cy="18" r="2.4"/>
+    </svg>
+    <h1>Ceylon Nikah</h1>
+    <p class="tagline">Profile Data Manager</p>
+
+    <!-- Setup admin (first run) -->
+    <div id="setupForm" style="display:none;">
+      <div class="setup-badge">முதல் அமைப்பு · SETUP</div>
+      <div class="login-err" id="setupErr"></div>
+      <div class="field"><label>Admin Username</label><input id="su_username" autocomplete="username"></div>
+      <div class="field"><label>Password</label><input id="su_pass" type="password" autocomplete="new-password"></div>
+      <div class="field"><label>Password (again)</label><input id="su_pass2" type="password" autocomplete="new-password"></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px;" onclick="submitSetup()">Admin கணக்கை உருவாக்கு</button>
+      <div class="login-note">இதுவே Profile Data Manager-ன் முழு கட்டுப்பாட்டு (Admin) கணக்கு. இந்த username/password-ஐ பாதுகாப்பாக வையுங்கள்.</div>
+    </div>
+
+    <!-- Login -->
+    <div id="loginForm" style="display:none;">
+      <div class="login-err" id="loginErr"></div>
+      <div class="field"><label>Username</label><input id="li_username" autocomplete="username"></div>
+      <div class="field"><label>Password</label><input id="li_pass" type="password" autocomplete="current-password"></div>
+      <div class="remember-row"><input type="checkbox" id="li_remember"><label for="li_remember" style="margin:0;font-weight:400;">இந்த device-ல் நினைவில் வை (Remember me)</label></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="submitLogin()">உள் நுழைய (Login)</button>
+      <div class="login-note">Admin அல்லது Client account மூலம் நுழையவும். Client கணக்குகளை Admin உருவாக்கி தரும்.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MAIN APP ===================== -->
+<div id="appScreen">
+<header>
+  <div class="wrap">
+    <div class="header-top">
+      <div class="brand">
+        <svg class="logo-mark" width="42" height="42" viewBox="0 0 56 56">
+          <circle class="ring" cx="28" cy="28" r="24"/>
+          <path class="crescent" d="M33 12a17 17 0 1 0 0 32 14 14 0 1 1 0-32z"/>
+          <circle class="dot" cx="37" cy="18" r="2.4"/>
+        </svg>
+        <div>
+          <h1>Ceylon Nikah</h1>
+          <p>திருமண தகவல் மேலாண்மை · Profile Data Manager</p>
+        </div>
+      </div>
+      <div class="session-box">
+        <span class="role-pill" id="rolePill">—</span>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-chip"><b id="statTotal">0</b>மொத்த பதிவுகள்</div>
+      <div class="stat-chip"><b id="statMale">0</b>ஆண் பதிவுகள்</div>
+      <div class="stat-chip"><b id="statFemale">0</b>பெண் பதிவுகள்</div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="toolbar">
+    <input type="text" id="searchBox" class="search-input" placeholder="Reg ID, Place, District, Name தேடவும்...">
+    <select id="filterGender" class="filter">
+      <option value="">Gender</option>
+      <option value="Male">Male</option>
+      <option value="Female">Female</option>
+    </select>
+    <select id="filterDistrict" class="filter"><option value="">District</option></select>
+    <div id="adminToolbarBtns" style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="openForm()">+ புதிய பதிவு</button>
+      <button class="btn btn-outline" onclick="openClients()">👤 Clients</button>
+      <button class="btn btn-outline" onclick="exportData()">⭳ Backup</button>
+      <button class="btn btn-outline" onclick="document.getElementById('importFile').click()">⭱ Restore</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    </div>
+  </div>
+
+  <div class="section-label"><span>பதிவுகள் (Profiles)</span><span id="scopeNote" style="text-transform:none;letter-spacing:0;font-weight:400;"></span></div>
+  <div id="grid" class="grid"></div>
+</div>
+
+<footer>Ceylon Nikah Data Manager · உங்கள் சாதனத்தில் மட்டுமே சேமிக்கப்படுகிறது (Local Storage) · வழக்கமாக Backup எடுத்துக் கொள்ளவும்</footer>
+</div>
+
+<!-- ===== Form Modal ===== -->
+<div class="overlay" id="formOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="formTitle">புதிய பதிவு சேர்க்க</h2>
+      <button class="modal-close" onclick="closeForm()">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="profileForm" onsubmit="return saveProfile(event)">
+        <input type="hidden" id="f_id">
+        <div class="field full">
+          <label>புகைப்படங்கள் (Photos)</label>
+          <div class="photo-upload-row" id="photoRow">
+            <label class="photo-add-btn">+
+              <input type="file" accept="image/*" multiple style="display:none" onchange="handlePhotos(event)">
+            </label>
+          </div>
+        </div>
+        <div class="form-grid" style="margin-top:14px;">
+          <div class="field"><label>Reg ID *</label><input id="f_regid" required placeholder="C1169"></div>
+          <div class="field"><label>பெயர் (Name)</label><input id="f_name" placeholder="விருப்பமானது"></div>
+          <div class="field"><label>Place</label><input id="f_place"></div>
+          <div class="field"><label>District</label><input id="f_district"></div>
+          <div class="field"><label>Gender</label><select id="f_gender"><option value="">--</option><option>Male</option><option>Female</option></select></div>
+          <div class="field"><label>Marital Status</label><select id="f_marital"><option value="">--</option><option>Never Married</option><option>Divorced</option><option>Widowed</option></select></div>
+          <div class="field"><label>Age</label><input id="f_age" type="number" min="18" max="80"></div>
+          <div class="field"><label>Height</label><input id="f_height" placeholder="5 Feet & 2 Inches"></div>
+          <div class="field"><label>Weight</label><input id="f_weight" placeholder="62 kg"></div>
+          <div class="field"><label>Complexion</label><input id="f_complexion"></div>
+          <div class="field"><label>Dress Code</label><input id="f_dresscode"></div>
+          <div class="field"><label>Educational Qualification</label><input id="f_edu"></div>
+          <div class="field"><label>Occupation</label><input id="f_occupation"></div>
+          <div class="field"><label>Father's Occupation</label><input id="f_father"></div>
+          <div class="field"><label>Mother's Occupation</label><input id="f_mother"></div>
+          <div class="field full"><label>Siblings</label><input id="f_siblings"></div>
+          <div class="field"><label>Family Status</label><input id="f_familystatus"></div>
+          <div class="field"><label>Contact Number</label><input id="f_contact"></div>
+          <div class="field"><label>Expected Age Range</label><input id="f_expage" placeholder="27 to 30"></div>
+          <div class="field full"><label>Life Partner Expectations</label><textarea id="f_expectation" rows="3"></textarea></div>
+          <div class="field full"><label>Other Details</label><textarea id="f_otherdetails" rows="2"></textarea></div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeForm()">Cancel</button>
+      <button class="btn btn-primary" onclick="document.getElementById('profileForm').requestSubmit()">💾 சேமிக்க</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Detail Modal ===== -->
+<div class="overlay" id="detailOverlay">
+  <div class="modal" id="detailModalBox">
+    <div class="modal-head">
+      <h2 id="detailTitle">Profile</h2>
+      <button class="modal-close" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="modal-body" id="detailBody"></div>
+    <div class="modal-foot">
+      <button class="btn btn-whatsapp" onclick="shareCurrentWhatsApp()">📤 WhatsApp Share</button>
+      <button class="btn btn-outline" onclick="printCurrent()">🖨 Print</button>
+      <span id="detailAdminActions" style="display:flex;gap:10px;">
+        <button class="btn btn-danger" onclick="deleteCurrent()">🗑 நீக்கு</button>
+        <button class="btn btn-primary" onclick="editCurrent()">✎ Edit</button>
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Clients Modal (Admin only) ===== -->
+<div class="overlay" id="clientsOverlay">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-head">
+      <h2>Client கணக்குகள்</h2>
+      <button class="modal-close" onclick="closeClients()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="client-list" id="clientList"></div>
+      <div id="clientCredBox"></div>
+      <div class="section-label" style="margin-top:22px;">புதிய Client சேர்க்க</div>
+      <form id="clientForm" onsubmit="return saveClient(event)">
+        <input type="hidden" id="c_id">
+        <div class="form-grid">
+          <div class="field"><label>Client பெயர் / நிறுவனம்</label><input id="c_label" placeholder="எ.கா. Kekirawa Marriage Bureau"></div>
+          <div class="field"><label>Username *</label><input id="c_username" required></div>
+          <div class="field"><label>Password <span id="c_pass_note" style="font-weight:400;color:var(--ink-soft);">*</span></label><input id="c_pass" type="password" placeholder="புதிய password"></div>
+          <div class="field"><label>Gender வரம்பு</label><select id="c_gender"><option value="">அனைத்தும்</option><option>Male</option><option>Female</option></select></div>
+          <div class="field full"><label>District வரம்பு (comma-separated, காலியாக விட்டால் அனைத்தும்)</label><input id="c_districts" placeholder="எ.கா. Anuradhapura, Kandy"></div>
+          <div class="field full"><label class="checkline"><input type="checkbox" id="c_showcontact"> Contact Number-ஐ இந்த client பார்க்க அனுமதி</label></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:14px;">
+          <button type="button" class="btn btn-outline" onclick="resetClientForm()">Clear</button>
+          <button type="submit" class="btn btn-primary">💾 Client சேமி</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= STORAGE KEYS ================= */
+const K_PROFILES = 'ceylonNikahProfiles_v1';
+const K_ADMIN = 'cn_admin';
+const K_CLIENTS = 'cn_clients';
+const K_SESSION_PERSIST = 'cn_session_persist';
+
+let profiles = [];
+let clients = [];
+let currentSession = null; // {role:'admin'|'client', id, label, perms:{gender,districts,showContact}}
+let currentDetailId = null;
+let pendingPhotos = [];
+let editingClientId = null;
+
+/* ================= SIMPLE HASH (works offline, file://, no server) ================= */
+function simpleHash(str){
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for(let i=0;i<str.length;i++){
+    const ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1>>>16), 2246822507) ^ Math.imul(h2 ^ (h2>>>13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2>>>16), 2246822507) ^ Math.imul(h1 ^ (h1>>>13), 3266489909);
+  return (4294967296*(2097151 & h2) + (h1>>>0)).toString(36);
+}
+
+/* ================= AUTH ================= */
+function loadAuthData(){
+  try{ clients = JSON.parse(localStorage.getItem(K_CLIENTS)) || []; }catch(e){ clients = []; }
+}
+function getAdmin(){
+  try{ return JSON.parse(localStorage.getItem(K_ADMIN)); }catch(e){ return null; }
+}
+function saveAdmin(a){ localStorage.setItem(K_ADMIN, JSON.stringify(a)); }
+function saveClients(){ localStorage.setItem(K_CLIENTS, JSON.stringify(clients)); }
+
+function initAuth(){
+  loadAuthData();
+  const admin = getAdmin();
+  if(!admin){
+    document.getElementById('setupForm').style.display = 'block';
+    return;
+  }
+  let sess = null;
+  try{
+    sess = JSON.parse(sessionStorage.getItem('cn_session')) || JSON.parse(localStorage.getItem(K_SESSION_PERSIST));
+  }catch(e){}
+  if(sess && validateSession(sess)){
+    enterApp(sess);
+  }else{
+    document.getElementById('loginForm').style.display = 'block';
+  }
+}
+function validateSession(sess){
+  if(sess.role === 'admin'){
+    const a = getAdmin();
+    return a && a.username === sess.username;
+  }else if(sess.role === 'client'){
+    return clients.some(c=>c.id===sess.id);
+  }
+  return false;
+}
+
+function submitSetup(){
+  const u = document.getElementById('su_username').value.trim();
+  const p1 = document.getElementById('su_pass').value;
+  const p2 = document.getElementById('su_pass2').value;
+  const err = document.getElementById('setupErr');
+  if(!u || !p1){ err.textContent='Username மற்றும் Password கட்டாயம்.'; err.style.display='block'; return; }
+  if(p1.length < 4){ err.textContent='Password குறைந்தது 4 எழுத்துகள் வேண்டும்.'; err.style.display='block'; return; }
+  if(p1 !== p2){ err.textContent='Password ஒத்துபோகவில்லை.'; err.style.display='block'; return; }
+  saveAdmin({username:u, passHash: simpleHash(p1)});
+  const sess = {role:'admin', username:u, label:'Admin'};
+  sessionStorage.setItem('cn_session', JSON.stringify(sess));
+  enterApp(sess);
+}
+
+function submitLogin(){
+  const u = document.getElementById('li_username').value.trim();
+  const p = document.getElementById('li_pass').value;
+  const remember = document.getElementById('li_remember').checked;
+  const err = document.getElementById('loginErr');
+  err.style.display = 'none';
+  const admin = getAdmin();
+  let sess = null;
+  if(admin && admin.username === u && admin.passHash === simpleHash(p)){
+    sess = {role:'admin', username:u, label:'Admin'};
+  }else{
+    const c = clients.find(c=>c.username===u && c.passHash===simpleHash(p));
+    if(c){
+      sess = {role:'client', id:c.id, username:c.username, label:c.label||c.username, perms:{gender:c.gender||'', districts:c.districts||[], showContact:!!c.showContact}};
+    }
+  }
+  if(!sess){
+    err.textContent = 'தவறான Username அல்லது Password.';
+    err.style.display = 'block';
+    return;
+  }
+  if(remember){ localStorage.setItem(K_SESSION_PERSIST, JSON.stringify(sess)); }
+  else { sessionStorage.setItem('cn_session', JSON.stringify(sess)); }
+  enterApp(sess);
+}
+
+function enterApp(sess){
+  currentSession = sess;
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'block';
+  const pill = document.getElementById('rolePill');
+  const adminBtns = document.getElementById('adminToolbarBtns');
+  const scopeNote = document.getElementById('scopeNote');
+  if(sess.role === 'admin'){
+    pill.textContent = '👑 Admin';
+    adminBtns.style.display = 'flex';
+    scopeNote.textContent = '';
+  }else{
+    pill.textContent = '👤 ' + sess.label;
+    adminBtns.style.display = 'none';
+    const bits = [];
+    if(sess.perms.gender) bits.push(sess.perms.gender);
+    if(sess.perms.districts && sess.perms.districts.length) bits.push(sess.perms.districts.join(', '));
+    scopeNote.textContent = bits.length ? ('· வரம்பு: ' + bits.join(' · ')) : '· அனைத்து பதிவுகளும்';
+  }
+  loadProfiles();
+  refreshAll();
+}
+
+function logout(){
+  sessionStorage.removeItem('cn_session');
+  localStorage.removeItem(K_SESSION_PERSIST);
+  location.reload();
+}
+
+/* ================= PROFILES ================= */
+function loadProfiles(){
+  try{ profiles = JSON.parse(localStorage.getItem(K_PROFILES)) || []; }catch(e){ profiles = []; }
+}
+function persist(){
+  try{ localStorage.setItem(K_PROFILES, JSON.stringify(profiles)); }
+  catch(e){ alert('சேமிப்பு நிறைந்துவிட்டது (storage full). தயவுசெய்து Backup எடுத்து பழைய போட்டோக்களை நீக்கவும்.'); }
+}
+
+function visibleProfiles(){
+  if(!currentSession || currentSession.role === 'admin') return profiles;
+  const perms = currentSession.perms || {};
+  return profiles.filter(p=>{
+    if(perms.gender && p.gender !== perms.gender) return false;
+    if(perms.districts && perms.districts.length && !perms.districts.includes(p.district)) return false;
+    return true;
+  });
+}
+
+function updateStats(){
+  const list = visibleProfiles();
+  document.getElementById('statTotal').textContent = list.length;
+  document.getElementById('statMale').textContent = list.filter(p=>p.gender==='Male').length;
+  document.getElementById('statFemale').textContent = list.filter(p=>p.gender==='Female').length;
+}
+function updateDistrictFilter(){
+  const sel = document.getElementById('filterDistrict');
+  const current = sel.value;
+  const districts = [...new Set(visibleProfiles().map(p=>p.district).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">District</option>' + districts.map(d=>`<option ${d===current?'selected':''}>${escapeHtml(d)}</option>`).join('');
+}
+function escapeHtml(str){
+  if(str===undefined || str===null) return '';
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function renderGrid(){
+  const grid = document.getElementById('grid');
+  const q = document.getElementById('searchBox').value.trim().toLowerCase();
+  const genderF = document.getElementById('filterGender').value;
+  const districtF = document.getElementById('filterDistrict').value;
+
+  let list = visibleProfiles().filter(p=>{
+    if(genderF && p.gender!==genderF) return false;
+    if(districtF && p.district!==districtF) return false;
+    if(q){
+      const hay = [p.regid,p.name,p.place,p.district,p.occupation].join(' ').toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  }).sort((a,b)=> (b.createdAt||0) - (a.createdAt||0));
+
+  if(list.length===0){
+    grid.innerHTML = `<div class="empty-state" style="width:100%;"><div class="icon">🗂️</div>பதிவுகள் இல்லை.</div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(p=>{
+    const photo = (p.photos && p.photos[0]) ? `<img class="pc-photo" src="${p.photos[0]}">` : `<div class="pc-photo">${(p.gender==='Male'?'♂':(p.gender==='Female'?'♀':'?'))}</div>`;
+    return `
+    <div class="profile-card" onclick="openDetail('${p.id}')">
+      <div class="pc-top">
+        ${photo}
+        <div class="pc-info">
+          <div class="pc-regid">${escapeHtml(p.regid||'—')}</div>
+          <div class="pc-name">${escapeHtml(p.name || '(பெயர் இல்லை)')}</div>
+          <div class="pc-sub">${escapeHtml(p.place||'')}${p.place&&p.district?', ':''}${escapeHtml(p.district||'')}</div>
+        </div>
+      </div>
+      <div class="pc-tags">
+        ${p.gender?`<span class="tag">${escapeHtml(p.gender)}</span>`:''}
+        ${p.age?`<span class="tag">${escapeHtml(p.age)} yrs</span>`:''}
+        ${p.marital?`<span class="tag">${escapeHtml(p.marital)}</span>`:''}
+        <button class="pc-share" title="WhatsApp Share" onclick="event.stopPropagation(); shareProfileWhatsApp('${p.id}')">📤</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function refreshAll(){ updateStats(); updateDistrictFilter(); renderGrid(); }
+document.getElementById('searchBox').addEventListener('input', renderGrid);
+document.getElementById('filterGender').addEventListener('change', renderGrid);
+document.getElementById('filterDistrict').addEventListener('change', renderGrid);
+
+/* ================= PHOTOS ================= */
+function handlePhotos(event){
+  const files = Array.from(event.target.files);
+  files.forEach(file=>{
+    const reader = new FileReader();
+    reader.onload = e =>{
+      const img = new Image();
+      img.onload = ()=>{
+        const maxDim = 480;
+        let w = img.width, h = img.height;
+        if(w > h && w > maxDim){ h = h*(maxDim/w); w = maxDim; }
+        else if(h > maxDim){ w = w*(maxDim/h); h = maxDim; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        pendingPhotos.push(canvas.toDataURL('image/jpeg', 0.7));
+        renderPhotoRow();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+  event.target.value = '';
+}
+function renderPhotoRow(){
+  const row = document.getElementById('photoRow');
+  const addBtn = row.querySelector('.photo-add-btn').outerHTML;
+  row.innerHTML = pendingPhotos.map((src,i)=>`<div class="photo-thumb"><img src="${src}"><button type="button" class="rm" onclick="removePendingPhoto(${i})">✕</button></div>`).join('') + addBtn;
+  row.querySelector('.photo-add-btn input').addEventListener('change', handlePhotos);
+}
+function removePendingPhoto(i){ pendingPhotos.splice(i,1); renderPhotoRow(); }
+
+/* ================= FORM (Admin only, guarded by UI hiding) ================= */
+function openForm(editId){
+  document.getElementById('profileForm').reset();
+  pendingPhotos = [];
+  document.getElementById('f_id').value = '';
+  document.getElementById('formTitle').textContent = 'புதிய பதிவு சேர்க்க';
+  if(editId){
+    const p = profiles.find(x=>x.id===editId);
+    if(p){
+      document.getElementById('formTitle').textContent = 'பதிவை திருத்த';
+      document.getElementById('f_id').value = p.id;
+      document.getElementById('f_regid').value = p.regid||'';
+      document.getElementById('f_name').value = p.name||'';
+      document.getElementById('f_place').value = p.place||'';
+      document.getElementById('f_district').value = p.district||'';
+      document.getElementById('f_gender').value = p.gender||'';
+      document.getElementById('f_marital').value = p.marital||'';
+      document.getElementById('f_age').value = p.age||'';
+      document.getElementById('f_height').value = p.height||'';
+      document.getElementById('f_weight').value = p.weight||'';
+      document.getElementById('f_complexion').value = p.complexion||'';
+      document.getElementById('f_dresscode').value = p.dresscode||'';
+      document.getElementById('f_edu').value = p.edu||'';
+      document.getElementById('f_occupation').value = p.occupation||'';
+      document.getElementById('f_father').value = p.father||'';
+      document.getElementById('f_mother').value = p.mother||'';
+      document.getElementById('f_siblings').value = p.siblings||'';
+      document.getElementById('f_familystatus').value = p.familystatus||'';
+      document.getElementById('f_contact').value = p.contact||'';
+      document.getElementById('f_expage').value = p.expage||'';
+      document.getElementById('f_expectation').value = p.expectation||'';
+      document.getElementById('f_otherdetails').value = p.otherdetails||'';
+      pendingPhotos = (p.photos||[]).slice();
+    }
+  }
+  renderPhotoRow();
+  document.getElementById('formOverlay').classList.add('active');
+}
+function closeForm(){ document.getElementById('formOverlay').classList.remove('active'); }
+
+function saveProfile(event){
+  event.preventDefault();
+  if(currentSession.role !== 'admin'){ alert('Admin மட்டுமே பதிவுகளை சேர்க்க/திருத்த முடியும்.'); return false; }
+  const id = document.getElementById('f_id').value || ('p_' + Date.now() + '_' + Math.random().toString(36).slice(2,7));
+  const existingIdx = profiles.findIndex(x=>x.id===id);
+  const data = {
+    id,
+    regid: document.getElementById('f_regid').value.trim(),
+    name: document.getElementById('f_name').value.trim(),
+    place: document.getElementById('f_place').value.trim(),
+    district: document.getElementById('f_district').value.trim(),
+    gender: document.getElementById('f_gender').value,
+    marital: document.getElementById('f_marital').value,
+    age: document.getElementById('f_age').value,
+    height: document.getElementById('f_height').value.trim(),
+    weight: document.getElementById('f_weight').value.trim(),
+    complexion: document.getElementById('f_complexion').value.trim(),
+    dresscode: document.getElementById('f_dresscode').value.trim(),
+    edu: document.getElementById('f_edu').value.trim(),
+    occupation: document.getElementById('f_occupation').value.trim(),
+    father: document.getElementById('f_father').value.trim(),
+    mother: document.getElementById('f_mother').value.trim(),
+    siblings: document.getElementById('f_siblings').value.trim(),
+    familystatus: document.getElementById('f_familystatus').value.trim(),
+    contact: document.getElementById('f_contact').value.trim(),
+    expage: document.getElementById('f_expage').value.trim(),
+    expectation: document.getElementById('f_expectation').value.trim(),
+    otherdetails: document.getElementById('f_otherdetails').value.trim(),
+    photos: pendingPhotos.slice(),
+    createdAt: existingIdx>=0 ? profiles[existingIdx].createdAt : Date.now()
+  };
+  if(existingIdx>=0){ profiles[existingIdx] = data; } else { profiles.push(data); }
+  persist();
+  refreshAll();
+  closeForm();
+  return false;
+}
+
+/* ================= DETAIL ================= */
+function openDetail(id){
+  const p = visibleProfiles().find(x=>x.id===id);
+  if(!p) return;
+  currentDetailId = id;
+  document.getElementById('detailTitle').textContent = p.regid + (p.name ? ' — ' + p.name : '');
+  const showContact = currentSession.role === 'admin' || (currentSession.perms && currentSession.perms.showContact);
+
+  const rows = [
+    ['Place', p.place],['District', p.district],['Gender', p.gender],
+    ['Marital Status', p.marital],['Age', p.age],['Height', p.height],
+    ['Weight', p.weight],['Complexion', p.complexion],['Dress Code', p.dresscode],
+    ['Education', p.edu],['Occupation', p.occupation],["Father's Occupation", p.father],
+    ["Mother's Occupation", p.mother],['Family Status', p.familystatus],
+    ...(showContact ? [['Contact', p.contact]] : []),
+    ['Expected Age', p.expage]
+  ];
+  let html = '';
+  if(p.photos && p.photos.length) html += `<div class="detail-photos">${p.photos.map(src=>`<img src="${src}">`).join('')}</div>`;
+  html += `<div class="detail-grid">`;
+  rows.forEach(([k,v])=>{ if(!v) return; html += `<div class="detail-row"><div class="k">${k}</div><div class="v">${escapeHtml(v)}</div></div>`; });
+  if(p.siblings) html += `<div class="detail-row full"><div class="k">Siblings</div><div class="v">${escapeHtml(p.siblings)}</div></div>`;
+  if(p.expectation) html += `<div class="detail-row full"><div class="k">Life Partner Expectations</div><div class="v">${escapeHtml(p.expectation)}</div></div>`;
+  if(p.otherdetails) html += `<div class="detail-row full"><div class="k">Other Details</div><div class="v">${escapeHtml(p.otherdetails)}</div></div>`;
+  html += `</div>`;
+  document.getElementById('detailBody').innerHTML = html;
+  document.getElementById('detailAdminActions').style.display = currentSession.role === 'admin' ? 'flex' : 'none';
+  document.getElementById('detailOverlay').classList.add('active');
+}
+function closeDetail(){ document.getElementById('detailOverlay').classList.remove('active'); currentDetailId = null; }
+function deleteCurrent(){
+  if(!currentDetailId || currentSession.role!=='admin') return;
+  if(!confirm('இந்த பதிவை நிரந்தரமாக நீக்க வேண்டுமா?')) return;
+  profiles = profiles.filter(p=>p.id!==currentDetailId);
+  persist(); refreshAll(); closeDetail();
+}
+function editCurrent(){ const id = currentDetailId; closeDetail(); openForm(id); }
+function printCurrent(){ window.print(); }
+
+/* ================= WHATSAPP SHARE ================= */
+function buildShareText(p){
+  const showContact = currentSession.role === 'admin' || (currentSession.perms && currentSession.perms.showContact);
+  const lines = [
+    `*Ceylon Nikah — ${p.regid||''}*`,
+    p.name ? `Name: ${p.name}` : null,
+    p.place || p.district ? `Place: ${[p.place,p.district].filter(Boolean).join(', ')}` : null,
+    p.gender ? `Gender: ${p.gender}` : null,
+    p.marital ? `Marital Status: ${p.marital}` : null,
+    p.age ? `Age: ${p.age}` : null,
+    p.height ? `Height: ${p.height}` : null,
+    p.weight ? `Weight: ${p.weight}` : null,
+    p.complexion ? `Complexion: ${p.complexion}` : null,
+    p.edu ? `Education: ${p.edu}` : null,
+    p.occupation ? `Occupation: ${p.occupation}` : null,
+    p.familystatus ? `Family Status: ${p.familystatus}` : null,
+    p.expage ? `Expected Age: ${p.expage}` : null,
+    p.expectation ? `Expectations: ${p.expectation}` : null,
+    p.otherdetails ? `Other: ${p.otherdetails}` : null,
+    showContact && p.contact ? `Contact: ${p.contact}` : null
+  ].filter(Boolean);
+  return lines.join('\n');
+}
+async function shareProfileWhatsApp(id){
+  const p = visibleProfiles().find(x=>x.id===id);
+  if(!p) return;
+  const text = buildShareText(p);
+  if(navigator.canShare && p.photos && p.photos.length){
+    try{
+      const res = await fetch(p.photos[0]);
+      const blob = await res.blob();
+      const file = new File([blob], (p.regid||'profile') + '.jpg', {type:'image/jpeg'});
+      if(navigator.canShare({files:[file]})){
+        await navigator.share({files:[file], text});
+        return;
+      }
+    }catch(e){ /* fall through to text-only */ }
+  }
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+}
+function shareCurrentWhatsApp(){ if(currentDetailId) shareProfileWhatsApp(currentDetailId); }
+
+/* ================= EXPORT / IMPORT (Admin only) ================= */
+function exportData(){
+  if(currentSession.role!=='admin') return;
+  const blob = new Blob([JSON.stringify(profiles, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `ceylon-nikah-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url);
+}
+function importData(event){
+  if(currentSession.role!=='admin') return;
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e =>{
+    try{
+      const incoming = JSON.parse(e.target.result);
+      if(!Array.isArray(incoming)) throw new Error('invalid');
+      const mode = confirm('OK = இணைக்க (merge) | Cancel = முழுவதுமாக மாற்ற (replace)');
+      if(mode){
+        const existingIds = new Set(profiles.map(p=>p.id));
+        incoming.forEach(p=>{ if(!existingIds.has(p.id)) profiles.push(p); });
+      }else{ profiles = incoming; }
+      persist(); refreshAll();
+      alert('Restore செய்யப்பட்டது! மொத்த பதிவுகள்: ' + profiles.length);
+    }catch(err){ alert('கோப்பு சரியாக இல்லை (invalid backup file).'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+/* ================= CLIENTS (Admin only) ================= */
+function openClients(){
+  if(currentSession.role!=='admin') return;
+  renderClientList();
+  resetClientForm();
+  document.getElementById('clientsOverlay').classList.add('active');
+}
+function closeClients(){ document.getElementById('clientsOverlay').classList.remove('active'); }
+
+function renderClientList(){
+  const box = document.getElementById('clientList');
+  if(clients.length===0){ box.innerHTML = '<div style="color:var(--ink-soft);font-size:13px;">இன்னும் Client கணக்குகள் இல்லை.</div>'; return; }
+  box.innerHTML = clients.map(c=>{
+    const scope = [c.gender||'அனைத்து Gender', (c.districts&&c.districts.length)?c.districts.join(', '):'அனைத்து District', c.showContact?'Contact தெரியும்':'Contact மறைக்கப்பட்டது'].join(' · ');
+    return `
+    <div class="client-item">
+      <div>
+        <div class="cn">${escapeHtml(c.label||c.username)}</div>
+        <div class="cu">Username: ${escapeHtml(c.username)}</div>
+        <div class="cperm">${escapeHtml(scope)}</div>
+      </div>
+      <div class="client-actions">
+        <button class="btn btn-outline btn-sm" onclick="shareClientCreds('${c.id}')">📤</button>
+        <button class="btn btn-outline btn-sm" onclick="editClient('${c.id}')">✎</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteClient('${c.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function resetClientForm(){
+  editingClientId = null;
+  document.getElementById('clientForm').reset();
+  document.getElementById('c_id').value = '';
+  document.getElementById('c_pass_note').textContent = '*';
+  document.getElementById('clientCredBox').innerHTML = '';
+}
+function editClient(id){
+  const c = clients.find(x=>x.id===id);
+  if(!c) return;
+  editingClientId = id;
+  document.getElementById('c_id').value = c.id;
+  document.getElementById('c_label').value = c.label||'';
+  document.getElementById('c_username').value = c.username;
+  document.getElementById('c_pass').value = '';
+  document.getElementById('c_pass_note').textContent = '(மாற்ற வேண்டுமெனில் மட்டும் நிரப்பவும்)';
+  document.getElementById('c_gender').value = c.gender||'';
+  document.getElementById('c_districts').value = (c.districts||[]).join(', ');
+  document.getElementById('c_showcontact').checked = !!c.showContact;
+}
+function deleteClient(id){
+  if(!confirm('இந்த Client கணக்கை நீக்க வேண்டுமா?')) return;
+  clients = clients.filter(c=>c.id!==id);
+  saveClients(); renderClientList();
+}
+function shareClientCreds(id){
+  const c = clients.find(x=>x.id===id);
+  if(!c) return;
+  const text = `*Ceylon Nikah — Client Login*\nUsername: ${c.username}\nPassword: (நீங்கள் அமைத்த password)\nLink: ${location.href}`;
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+}
+
+function saveClient(event){
+  event.preventDefault();
+  const username = document.getElementById('c_username').value.trim();
+  const pass = document.getElementById('c_pass').value;
+  const label = document.getElementById('c_label').value.trim();
+  const gender = document.getElementById('c_gender').value;
+  const districts = document.getElementById('c_districts').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const showContact = document.getElementById('c_showcontact').checked;
+
+  if(clients.some(c=>c.username===username && c.id!==editingClientId)){
+    alert('இந்த Username ஏற்கனவே பயன்பாட்டில் உள்ளது.'); return false;
+  }
+
+  if(editingClientId){
+    const c = clients.find(x=>x.id===editingClientId);
+    c.username = username; c.label = label; c.gender = gender; c.districts = districts; c.showContact = showContact;
+    if(pass) c.passHash = simpleHash(pass);
+  }else{
+    if(!pass){ alert('புதிய Client-க்கு Password கட்டாயம்.'); return false; }
+    clients.push({ id:'c_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), username, passHash: simpleHash(pass), label, gender, districts, showContact, createdAt: Date.now() });
+  }
+  saveClients();
+  renderClientList();
+  const savedUser = username, savedPass = pass || '(மாறவில்லை)';
+  document.getElementById('clientCredBox').innerHTML = `
+    <div class="cred-box">
+      <div class="row"><span>Username</span><b>${escapeHtml(savedUser)}</b></div>
+      <div class="row"><span>Password</span><b>${escapeHtml(savedPass)}</b></div>
+      <button class="btn btn-whatsapp btn-sm" style="margin-top:6px;" onclick="window.open('https://wa.me/?text='+encodeURIComponent('*Ceylon Nikah — Client Login*\\nUsername: ${savedUser}\\nPassword: ${savedPass}\\nLink: ${location.href}'),'_blank')">📤 WhatsApp-ல் அனுப்பு</button>
+    </div>`;
+  resetClientFormKeepBox();
+  return false;
+}
+function resetClientFormKeepBox(){
+  editingClientId = null;
+  document.getElementById('clientForm').reset();
+  document.getElementById('c_id').value = '';
+  document.getElementById('c_pass_note').textContent = '*';
+}
+
+/* ================= INIT ================= */
+initAuth();
+</script>
+</body>
+</html>
